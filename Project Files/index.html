@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦋 Enchanted Wings - AI Butterfly Classifier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: #4a5568;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .upload-section h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .file-input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .predict-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .predict-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        .predict-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .train-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ed8936, #dd6b20);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .train-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(237, 137, 54, 0.4);
+        }
+
+        .preview-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .preview-section h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 20px;
+        }
+
+        .placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(45deg, #f7fafc, #edf2f7);
+            border: 2px dashed #cbd5e0;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a0aec0;
+            font-size: 1.1rem;
+        }
+
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            grid-column: 1 / -1;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-section h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .prediction-result {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .scientific-name {
+            font-style: italic;
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .confidence-bar {
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .confidence-fill {
+            height: 30px;
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            transition: width 1s ease;
+        }
+
+        .butterfly-info {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .butterfly-info h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .butterfly-info p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-item strong {
+            color: #4a5568;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .top-predictions {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            display: none;
+            font-size: 1.2rem;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦋 Enchanted Wings</h1>
+            <p>Advanced Butterfly Species Classification using Deep Learning</p>
+            <p>Upload a butterfly image and our AI model will identify the species with remarkable accuracy</p>
+        </div>
+
+        <div class="main-content">
+            <div class="upload-section">
+                <h2>📸 Upload Butterfly Image</h2>
+                <div class="file-input-container">
+                    <input type="file" id="imageInput" class="file-input" accept="image/*">
+                    <label for="imageInput" class="file-input-label">
+                        Choose Image File
+                    </label>
+                </div>
+                <button id="predictBtn" class="predict-btn" disabled>
+                    🔍 Classify Butterfly
+                </button>
+                <button id="trainBtn" class="train-btn">
+                    🚀 Train New Model
+                </button>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    Analyzing image...
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <h2>🖼️ Image Preview</h2>
+                <div id="imagePreview" class="placeholder">
+                    Select an image to see preview
+                </div>
+            </div>
+        </div>
+
+      <div class="result-section" id="resultSection" style="display: none;">
+            <h2>🎯 Classification Results</h2>
+            <div id="predictionResult" class="prediction-result"></div>
+            <div class="confidence-bar">
+                <div id="confidenceFill" class="confidence-fill" style="width: 0%;">
+                    0% Confidence
+                </div>
+            </div>
+            <div id="butterflyInfo" class="butterfly-info"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+
+        // Handle file selection
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                
+                // Show image preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imagePreview = document.getElementById('imagePreview');
+                    imagePreview.innerHTML = `<img src="${e.target.result}" class="image-preview" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+                
+                // Enable predict button
+                document.getElementById('predictBtn').disabled = false;
+            }
+        });
+
+        // Handle prediction
+        document.getElementById('predictBtn').addEventListener('click', function() {
+            if (!selectedFile) {
+                alert('Please select an image first');
+                return;
+            }
+
+            // Show loading state
+            const loading = document.getElementById('loading');
+            const predictBtn = document.getElementById('predictBtn');
+            
+            loading.style.display = 'block';
+            predictBtn.disabled = true;
+            predictBtn.textContent = 'Analyzing...';
+
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            // Send prediction request
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    alert('Classification failed: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during classification');
+            })
+            .finally(() => {
+                // Hide loading state
+                loading.style.display = 'none';
+                predictBtn.disabled = false;
+                predictBtn.textContent = '🔍 Classify Butterfly';
+            });
+        });
+
+        // Handle model training
+        document.getElementById('trainBtn').addEventListener('click', function() {
+            const trainBtn = document.getElementById('trainBtn');
+            
+            if (confirm('Model training can take several hours. Are you sure you want to proceed?')) {
+                trainBtn.disabled = true;
+                trainBtn.textContent = 'Training Model...';
+                
+                fetch('/train', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Model trained successfully!');
+                    } else {
+                        alert('Training failed: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred during training');
+                })
+                .finally(() => {
+                    trainBtn.disabled = false;
+                    trainBtn.textContent = '🚀 Train New Model';
+                });
+            }
+        });
+
+        function displayResults(data) {
+            // Show results section
+            const resultSection = document.getElementById('resultSection');
+            resultSection.style.display = 'block';
+
+            // Update prediction result
+            const predictionResult = document.getElementById('predictionResult');
+            predictionResult.textContent = data.species_name;
+
+            // Update confidence bar
+            const confidenceFill = document.getElementById('confidenceFill');
+            const confidencePercent = Math.round(data.confidence * 100);
+            confidenceFill.style.width = confidencePercent + '%';
+            confidenceFill.textContent = confidencePercent + '% Confidence';
+
+            // Update butterfly info
+            const butterflyInfo = document.getElementById('butterflyInfo');
+            butterflyInfo.innerHTML = `
+                <h3>Species Information</h3>
+                <div class="scientific-name">${data.scientific_name}</div>
+                <p>${data.info}</p>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Habitat:</strong>
+                        ${data.habitat}
+                    </div>
+                    <div class="info-item">
+                        <strong>Wingspan:</strong>
+                        ${data.wingspan}
+                    </div>
+                    <div class="info-item">
+                        <strong>Flight Period:</strong>
+                        ${data.flight_period}
+                    </div>
+                </div>
+
+                <div class="top-predictions">
+                    <h4>Top Predictions:</h4>
+                    ${data.all_predictions.map(pred => `
+                        <div class="prediction-item">
+                            <span>${pred.name}</span>
+                            <span>${Math.round(pred.confidence * 100)}%</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Scroll to results
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
